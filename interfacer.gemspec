@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Chris D'Aloisio"]
   spec.email         = ["chris@creativecontrol.com.au"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = "Declaratively define your interfaces and their implementations"
+  spec.description   = "Writing too many specs? Can't decide on a common structure for all of your excellent OOP? This gem is biased, but can help."
+  spec.homepage      = "https://chrisdaloisio.com/interfacer"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
