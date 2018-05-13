@@ -2,7 +2,7 @@ require "interfacer/version"
 require "helpers/symbol_helpers"
 
 class MissingInterface < StandardError; end
-class MissingImplementations < StandardError; end
+class MissingMethodsDetected < StandardError; end
 class AdditionalMethodsDetected < StandardError; end
 
 class InterfaceDefinitionProxy
@@ -37,6 +37,15 @@ class ImplementationDefinitionProxy
   def method_missing(name, *args, &block)
     @defined_public_methods << [name, block]
   end
+
+  def init(*arg_names)
+    init_proc = lambda do |*arg_values|
+      arg_names.zip(arg_values).each do |name, value|
+        instance_variable_set("@#{name}", value)
+      end
+    end
+    @defined_public_methods << [:initialize, init_proc]
+  end
 end
 
 module Interfacer
@@ -69,12 +78,12 @@ module Interfacer
     raise ArgumentError, 'Must provide a block' unless block_given?
     definition_proxy.instance_eval(&block)
 
-    public_definitions_diff = modjule.instance_methods.sort - definition_proxy.defined_public_methods.map(&:first).sort
+    public_definitions_diff = modjule.instance_methods.sort - definition_proxy.defined_public_methods.map(&:first).sort - [:initialize]
     if public_definitions_diff.count.positive?
-      raise MissingImplementations, "Missing definitions for #{public_definitions_diff}"
+      raise MissingMethodsDetected, "Missing definitions for #{public_definitions_diff}"
     end
 
-    public_definitions_diff = definition_proxy.defined_public_methods.map(&:first).sort - modjule.instance_methods.sort
+    public_definitions_diff = definition_proxy.defined_public_methods.map(&:first).sort - modjule.instance_methods.sort - [:initialize]
     if public_definitions_diff.count.positive?
       raise AdditionalMethodsDetected, "Additional definitions detected, please remove #{public_definitions_diff}"
     end

@@ -54,7 +54,7 @@ RSpec.describe Interfacer do
       specify { expect { implement }.not_to raise_error }
     end
 
-    context 'when an implementation has been written' do
+    context 'when an implementation has been written without an initializer' do
       let(:implementation) do
         Interfacer.implement(:some_interface, for_class: :something_else) do
           example_string do
@@ -70,6 +70,27 @@ RSpec.describe Interfacer do
       it 'works', :aggregate_failures do
         expect(implement.new.example_string).to eq 'foo'
         expect(implement.new.example_integer).to eq 1
+      end
+    end
+
+    context 'when an implementation has been written with an initializer' do
+      let(:implementation) do
+        Interfacer.implement(:some_interface, for_class: :something_else) do
+          init(:value1, :value2)
+
+          example_string do
+            @value1
+          end
+
+          example_integer do
+            @value2
+          end
+        end
+      end
+
+      it 'works', :aggregate_failures do
+        expect(implement.new('foo', 1).example_string).to eq 'foo'
+        expect(implement.new('foo', 1).example_integer).to eq 1
       end
     end
 
@@ -106,7 +127,7 @@ RSpec.describe Interfacer do
 
       specify do
         expect { implement }
-          .to raise_error(MissingImplementations, include('[:example_integer]'))
+          .to raise_error(MissingMethodsDetected, include('[:example_integer]'))
       end
     end
   end
