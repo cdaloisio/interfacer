@@ -1,4 +1,6 @@
 require "bundler/setup"
+require "pry"
+
 require "interfacer"
 
 RSpec.configure do |config|
