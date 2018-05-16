@@ -8,15 +8,20 @@ RSpec.describe Interfacer do
       implementation
     end
 
-    before do
+    around do |example|
       Interfacer::Interface.build(:some_interface) do
         def_public_methods(:example_string, :example_integer)
       end
+      example.run
+      Object.send(:remove_const, :SomeInterface)
+      Object.send(:remove_const, :SomethingElse) if Object.constants.include?(:SomethingElse)
     end
+
+    let(:for_class) { :something_else }
 
     context 'when interface does not exist' do
       let(:implementation) do
-        Interfacer.implement(:non_existent_interface, for_class: :something_else)
+        Interfacer.implement(:non_existent_interface, for_class: for_class)
       end
 
       specify { expect { implement }.to raise_error(MissingInterface, 'NonExistentInterface') }
@@ -24,7 +29,7 @@ RSpec.describe Interfacer do
 
     context 'when interface does exist' do
       let(:implementation) do
-        Interfacer.implement(:some_interface, for_class: :something_else) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
           example_string do
             'foo'
           end
@@ -40,7 +45,7 @@ RSpec.describe Interfacer do
 
     context 'when an implementation has been written without an initializer' do
       let(:implementation) do
-        Interfacer.implement(:some_interface, for_class: :something_else) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
           example_string do
             'foo'
           end
@@ -59,7 +64,7 @@ RSpec.describe Interfacer do
 
     context 'when an implementation has been written with an initializer' do
       let(:implementation) do
-        Interfacer.implement(:some_interface, for_class: :something_else) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
           init(:value1, :value2)
 
           example_string do
@@ -80,7 +85,7 @@ RSpec.describe Interfacer do
 
     context 'when additional methods have been added to implementation' do
       let(:implementation) do
-        Interfacer.implement(:some_interface, for_class: :something_else) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
           example_string do
             'foo'
           end
@@ -102,7 +107,7 @@ RSpec.describe Interfacer do
 
     context 'when not all implementations have been written' do
       let(:implementation) do
-        Interfacer.implement(:some_interface, for_class: :something_else) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
           example_string do
             "some string"
           end
