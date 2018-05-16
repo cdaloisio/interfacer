@@ -13,6 +13,8 @@ RSpec.describe Interfacer do
 
     it 'works', :aggregate_failures do
       expect(build).to eq SomeInterface
+      expect(build.public_instance_methods).to include(:example_string, :example_integer)
+      expect(build.private_instance_methods).to include(:example_private)
       expect { Class.new.extend(build).example_string }.to raise_error(NotImplementedError)
       expect { Class.new.extend(build).example_integer }.to raise_error(NotImplementedError)
       expect { Class.new.extend(build).send(:example_private) }.to raise_error(NotImplementedError)

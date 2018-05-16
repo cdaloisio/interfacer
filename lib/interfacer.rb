@@ -21,7 +21,7 @@ class InterfaceDefinitionProxy
 
   def def_private_methods(*method_names)
     method_names.each do |name|
-      @defined_public_methods << [name, -> { raise NotImplementedError }]
+      @defined_private_methods << [name, -> { raise NotImplementedError }]
     end
   end
 end
@@ -60,7 +60,8 @@ module Interfacer
     end
 
     definition_proxy.defined_private_methods.each do |name, definition|
-      modjule.send(:private, name, definition)
+      modjule.send(:define_method, name, definition)
+      modjule.send(:private, name)
     end
 
     modularized_name = module_sym.classify
