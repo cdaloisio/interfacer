@@ -1,21 +1,32 @@
-require "interfacer/version"
-require "helpers/symbol_helpers"
+require 'interfacer/version'
+require 'helpers/symbol_helpers'
 
 class MissingInterface < StandardError; end
 class MissingMethodsDetected < StandardError; end
 class AdditionalMethodsDetected < StandardError; end
 
 class InterfaceDefinitionProxy
-  attr_reader :defined_public_methods, :defined_private_methods
+  attr_reader(
+    :defined_public_methods,
+    :defined_protected_methods,
+    :defined_private_methods
+  )
 
   def initialize
     @defined_public_methods = []
+    @defined_protected_methods = []
     @defined_private_methods = []
   end
 
   def def_public_methods(*method_names)
     method_names.each do |name|
       @defined_public_methods << [name, -> { raise NotImplementedError }]
+    end
+  end
+
+  def def_protected_methods(*method_names)
+    method_names.each do |name|
+      @defined_protected_methods << [name, -> { raise NotImplementedError }]
     end
   end
 
@@ -34,7 +45,7 @@ class ImplementationDefinitionProxy
     @defined_private_methods = []
   end
 
-  def method_missing(name, *args, &block)
+  def method_missing(name, *_args, &block)
     @defined_public_methods << [name, block]
   end
 
@@ -57,6 +68,11 @@ module Interfacer
 
     definition_proxy.defined_public_methods.each do |name, definition|
       modjule.send(:define_method, name, definition)
+    end
+
+    definition_proxy.defined_protected_methods.each do |name, definition|
+      modjule.send(:define_method, name, definition)
+      modjule.send(:protected, name)
     end
 
     definition_proxy.defined_private_methods.each do |name, definition|
