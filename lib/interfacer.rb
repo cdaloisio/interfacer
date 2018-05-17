@@ -3,12 +3,15 @@ require 'interfacer/interface_definition_proxy'
 require 'interfacer/interface'
 require 'interfacer/version'
 require 'helpers/symbol_helpers'
+require 'helpers/definition_helpers'
 
 class MissingInterface < StandardError; end
 class MissingMethodsDetected < StandardError; end
 class AdditionalMethodsDetected < StandardError; end
 
 module Interfacer
+  extend DefinitionHelpers
+
   def self.implement(module_sym, for_class:, &block)
     modularized_name = module_sym.classify
     modjule = Object.const_get modularized_name
@@ -29,20 +32,9 @@ module Interfacer
       raise AdditionalMethodsDetected, "Additional definitions detected, please remove #{public_definitions_diff}"
     end
 
-    definition_proxy.defined_public_methods.each do |name, definition|
-      klass.send(:define_method, name, definition)
-      klass.send(:public, name)
-    end
-
-    definition_proxy.defined_protected_methods.each do |name, definition|
-      klass.send(:define_method, name, definition)
-      klass.send(:protected, name)
-    end
-
-    definition_proxy.defined_private_methods.each do |name, definition|
-      klass.send(:define_method, name, definition)
-      klass.send(:private, name)
-    end
+    define_methods_with_visibility(:public, definition_proxy.defined_public_methods, klass)
+    define_methods_with_visibility(:protected, definition_proxy.defined_protected_methods, klass)
+    define_methods_with_visibility(:private, definition_proxy.defined_private_methods, klass)
 
     classified_name = for_class.classify
     Object.const_set classified_name, klass

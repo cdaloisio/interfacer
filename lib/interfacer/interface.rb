@@ -1,5 +1,9 @@
+require 'helpers/definition_helpers'
+
 module Interfacer
   module Interface
+    extend DefinitionHelpers
+
     def self.build(module_sym, &block)
       modjule = Module.new
 
@@ -13,13 +17,6 @@ module Interfacer
       modularized_name = module_sym.classify
       Object.const_set modularized_name, modjule
       Object.const_get modularized_name
-    end
-
-    private_class_method def self.define_methods_with_visibility(visibility, methods, modjule)
-      methods.each do |name, definition|
-        modjule.send(:define_method, name, definition)
-        modjule.send(visibility, name)
-      end
     end
   end
 end
