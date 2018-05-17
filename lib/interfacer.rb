@@ -31,6 +31,17 @@ module Interfacer
 
     definition_proxy.defined_public_methods.each do |name, definition|
       klass.send(:define_method, name, definition)
+      klass.send(:public, name)
+    end
+
+    definition_proxy.defined_protected_methods.each do |name, definition|
+      klass.send(:define_method, name, definition)
+      klass.send(:protected, name)
+    end
+
+    definition_proxy.defined_private_methods.each do |name, definition|
+      klass.send(:define_method, name, definition)
+      klass.send(:private, name)
     end
 
     classified_name = for_class.classify

@@ -1,5 +1,5 @@
 RSpec.describe Interfacer do
-  it "has a version number" do
+  it 'has a version number' do
     expect(Interfacer::VERSION).not_to be nil
   end
 
@@ -11,6 +11,7 @@ RSpec.describe Interfacer do
     around do |example|
       Interfacer::Interface.build(:some_interface) do
         def_public_methods(:example_string, :example_integer)
+        def_private_methods(:example_private)
       end
       example.run
       Object.send(:remove_const, :SomeInterface)
@@ -18,6 +19,22 @@ RSpec.describe Interfacer do
     end
 
     let(:for_class) { :something_else }
+
+    context 'when private methods are implemented' do
+      let(:implementation) do
+        Interfacer.implement(:some_interface, for_class: for_class) do
+          example_string {}
+          example_integer {}
+          private
+          example_private { 1 }
+        end
+      end
+
+      it 'works', :aggregate_failures do
+        expect(implement.new.private_methods).to include :example_private
+        expect(implement.new.send(:example_private)).to eq 1
+      end
+    end
 
     context 'when interface does not exist' do
       let(:implementation) do
