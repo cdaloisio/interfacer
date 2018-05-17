@@ -7,7 +7,12 @@ module Interfacer
 
     def self.build(klass_sym, with_interface:, for_class:, &block)
       interface_identifier = with_interface.classify
-      interface = Object.const_get interface_identifier
+
+      begin
+        interface = Object.const_get interface_identifier
+      rescue NameError
+        raise MissingInterface, interface_identifier
+      end
 
       klass = Class.new
 
@@ -70,11 +75,15 @@ module Interfacer
       define_methods_with_visibility(:protected, definition_proxy.defined_protected_methods, klass)
       define_methods_with_visibility(:private, definition_proxy.defined_private_methods, klass)
 
+      init_proc = lambda do |adaptee|
+        instance_variable_set("@#{for_class}", adaptee)
+      end
+
+      define_methods_with_visibility(:private, [[:initialize, init_proc]], klass)
+
       classified_name = "#{for_class}_to_#{klass_sym}_adapter".to_sym.classify
       Object.const_set classified_name, klass
       Object.const_get classified_name
-    rescue NameError
-      raise MissingInterface, interface_identifier
     end
   end
 end
