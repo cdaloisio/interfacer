@@ -6,7 +6,7 @@ module Interfacer
     extend DefinitionHelpers
 
     def self.build(klass_sym, with_interface:, for_class:, &block)
-      interface_identifier = with_interface.classify
+      interface_identifier = "#{with_interface}_interface".to_sym.classify
 
       begin
         interface = Object.const_get interface_identifier
