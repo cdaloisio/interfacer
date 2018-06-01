@@ -2,7 +2,7 @@ require 'helpers/definition_helpers'
 require 'interfacer/errors'
 
 module Interfacer
-  class Adapter
+  module Adapter
     extend DefinitionHelpers
 
     def self.build(klass_sym, with_interface:, for_class:, &block)

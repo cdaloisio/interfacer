@@ -4,17 +4,17 @@ module Interfacer
       subject(:build) do
         described_class.build(:car, with_interface: :abstract_vehicle, for_class: :scooter) do
           start do
-            "START"
+            'START'
           end
 
           stop do
-            "STOP"
+            'STOP'
           end
 
           protected
 
           reset do
-            "RESET"
+            'RESET'
           end
         end
       end

@@ -1,6 +1,7 @@
 require 'helpers/definition_helpers'
 
 module Interfacer
+  # This class lets you create an interface for any other class.
   module Interface
     extend DefinitionHelpers
 
