@@ -18,7 +18,7 @@ class ImplementationDefinitionProxy
     when :private
       @defined_private_methods << [name, block]
     else
-      raise NotImplementedError, 'Unknown visibility'
+      raise NotImplementedError, "Unknown visibility #{@visibility} - must be :public, :protected, :private"
     end
   end
 
