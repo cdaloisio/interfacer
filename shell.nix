@@ -9,9 +9,6 @@ let
 in pkgs.stdenv.mkDerivation {
   name = "interfacerEnv";
   buildInputs = [
-    file
-    git
-    libffi
     readline
     ruby.devEnv
   ];
