@@ -30,7 +30,7 @@ module Interfacer
       end
 
       context 'with refactoring guru example' do
-        subject(:build) do
+        subject(:adapter) do
           described_class.build(:round_peg, with_interface: :round_peg, for_class: :square_peg) do
             radius do
               @square_peg.width * Math.sqrt(2) / 2
@@ -39,6 +39,18 @@ module Interfacer
         end
 
         before do
+          class SquarePeg
+            def initialize(width)
+              @width = width
+            end
+
+            def width
+              @width
+            end
+          end
+        end
+
+        let(:round_hole) do
           class RoundHole
             def initialize(radius)
               @radius = radius
@@ -49,6 +61,10 @@ module Interfacer
             end
           end
 
+          RoundHole.new(2.5)
+        end
+
+        let(:round_peg) do
           class RoundPeg
             def initialize(radius)
               @radius = radius
@@ -59,28 +75,25 @@ module Interfacer
             end
           end
 
+          RoundPeg.new(2.5)
         end
 
-        let(:square_peg) do
-          class SquarePeg
-            def initialize(width)
-              @width = width
-            end
-
-            def width
-              @width
-            end
-          end
+        let(:small_square_peg) do
           SquarePeg.new(2)
         end
 
-        it 'works' do
+        let(:large_square_peg) do
+          SquarePeg.new(5)
+        end
+
+        it 'works', aggregate_failures: true do
           Interface.build(:round_peg) do
             def_public_methods(:radius)
           end
-          expect(build).to eq SquarePegToRoundPegAdapter
-          expect(build.new(square_peg).radius.round(2)).to eq 1.41
-          # TODO: expect RoundHole#methods to enforce interface types
+          expect(adapter).to eq SquarePegToRoundPegAdapter
+          expect(round_hole.fits(round_peg)).to eq true
+          expect(round_hole.fits(adapter.new(small_square_peg))).to eq true
+          expect(round_hole.fits(adapter.new(large_square_peg))).to eq false
         end
       end
     end
