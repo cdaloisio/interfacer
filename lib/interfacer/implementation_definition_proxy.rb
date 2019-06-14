@@ -1,11 +1,21 @@
 class ImplementationDefinitionProxy
-  attr_reader :defined_public_methods, :defined_private_methods, :defined_protected_methods
-
   def initialize
     @defined_public_methods = []
     @defined_protected_methods = []
     @defined_private_methods = []
     @visibility = :public
+  end
+
+  def defined_public_methods
+    @defined_public_methods.map(&:first).sort
+  end
+
+  def defined_protected_methods
+    @defined_protected_methods.map(&:first).sort
+  end
+
+  def defined_private_methods
+    @defined_private_methods.map(&:first).sort
   end
 
   def method_missing(name, *args, &block)

@@ -20,9 +20,9 @@ module Interfacer
       raise ArgumentError, 'Must provide a block' unless block_given?
       definition_proxy.instance_eval(&block)
 
-      adapter_public_methods = definition_proxy.defined_public_methods.map(&:first).sort
-      adapter_protected_methods = definition_proxy.defined_protected_methods.map(&:first).sort
-      adapter_private_methods = definition_proxy.defined_private_methods.map(&:first).sort
+      adapter_public_methods = definition_proxy.defined_public_methods
+      adapter_protected_methods = definition_proxy.defined_protected_methods
+      adapter_private_methods = definition_proxy.defined_private_methods
 
       interface_public_methods = interface.public_instance_methods.sort
       interface_protected_methods = interface.protected_instance_methods.sort
@@ -33,43 +33,21 @@ module Interfacer
           "Adapters shouldn't implement interfaces with private methods. Refer to:\nhttps://refactoring.guru/design-patterns/adapter"
       end
 
-      public_methods_count_diff = interface_public_methods.count - adapter_public_methods.count
-      protected_methods_count_diff = interface_protected_methods.count - adapter_protected_methods.count
-      private_methods_count_diff = interface_private_methods.count - adapter_private_methods.count
+      missing_public_methods = missing_methods(interface_public_methods, adapter_public_methods)
+      missing_protected_methods = missing_methods(interface_protected_methods, adapter_protected_methods)
+      missing_private_methods = missing_methods(interface_private_methods, adapter_private_methods)
 
-      missing_public_methods = []
-      missing_protected_methods = []
-      missing_private_methods = []
+      excess_public_methods = excess_methods(interface_public_methods, adapter_public_methods)
+      excess_protected_methods = excess_methods(interface_protected_methods, adapter_protected_methods)
+      excess_private_methods = excess_methods(interface_private_methods, adapter_private_methods)
 
-      excess_public_methods = []
-      excess_protected_methods = []
-      excess_private_methods = []
+      raise_for(:public, missing_public_methods, MissingMethodsDetected)
+      raise_for(:protected, missing_protected_methods, MissingMethodsDetected)
+      raise_for(:private, missing_private_methods, MissingMethodsDetected)
 
-      if public_methods_count_diff.positive?
-        missing_public_methods = interface_public_methods - adapter_public_methods
-      elsif public_methods_count_diff.negative?
-        excess_public_methods = adapter_public_methods - interface_public_methods
-      end
-
-      if protected_methods_count_diff.positive?
-        missing_protected_methods = interface_protected_methods - adapter_protected_methods
-      elsif protected_methods_count_diff.negative?
-        excess_protected_methods = adapter_protected_methods - interface_protected_methods
-      end
-
-      if private_methods_count_diff.positive?
-        missing_private_methods = interface_private_methods - adapter_private_methods
-      elsif private_methods_count_diff.negative?
-        excess_private_methods = adapter_private_methods - interface_private_methods
-      end
-
-      raise MissingMethodsDetected, "for public methods #{missing_public_methods}" unless missing_public_methods.empty?
-      raise MissingMethodsDetected, "for protected methods #{missing_protected_methods}" unless missing_protected_methods.empty?
-      raise MissingMethodsDetected, "for private methods #{missing_private_methods}" unless missing_private_methods.empty?
-
-      raise AdditionalMethodsDetected, "for public methods #{excess_public_methods}" unless excess_public_methods.empty?
-      raise AdditionalMethodsDetected, "for protected methods #{excess_protected_methods}" unless excess_protected_methods.empty?
-      raise AdditionalMethodsDetected, "for private methods #{excess_private_methods}" unless excess_private_methods.empty?
+      raise_for(:public, excess_public_methods, AdditionalMethodsDetected)
+      raise_for(:protected, excess_protected_methods, AdditionalMethodsDetected)
+      raise_for(:private, excess_private_methods, AdditionalMethodsDetected)
 
       define_methods_with_visibility(:public, definition_proxy.defined_public_methods, klass)
       define_methods_with_visibility(:protected, definition_proxy.defined_protected_methods, klass)

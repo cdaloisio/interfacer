@@ -20,7 +20,7 @@ module Interfacer
           end
         end
 
-        it 'works', :aggregate_failures do
+        specify do
           Interface.build(:abstract_vehicle) do
             def_public_methods(:start, :stop)
             def_protected_methods(:reset)
