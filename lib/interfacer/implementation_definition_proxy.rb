@@ -6,6 +6,18 @@ class ImplementationDefinitionProxy
     @visibility = :public
   end
 
+  def defined_public_methods_and_definitions
+    @defined_public_methods
+  end
+
+  def defined_protected_methods_and_definitions
+    @defined_protected_methods
+  end
+
+  def defined_private_methods_and_definitions
+    @defined_private_methods
+  end
+
   def defined_public_methods
     @defined_public_methods.map(&:first).sort
   end

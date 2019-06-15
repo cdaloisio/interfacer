@@ -49,9 +49,9 @@ module Interfacer
       raise_for(:protected, excess_protected_methods, AdditionalMethodsDetected)
       raise_for(:private, excess_private_methods, AdditionalMethodsDetected)
 
-      define_methods_with_visibility(:public, definition_proxy.defined_public_methods, klass)
-      define_methods_with_visibility(:protected, definition_proxy.defined_protected_methods, klass)
-      define_methods_with_visibility(:private, definition_proxy.defined_private_methods, klass)
+      define_methods_with_visibility(:public, definition_proxy.defined_public_methods_and_definitions, klass)
+      define_methods_with_visibility(:protected, definition_proxy.defined_protected_methods_and_definitions, klass)
+      define_methods_with_visibility(:private, definition_proxy.defined_private_methods_and_definitions, klass)
 
       init_proc = lambda do |adaptee|
         instance_variable_set("@#{for_class}", adaptee)
