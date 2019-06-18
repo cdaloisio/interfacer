@@ -20,11 +20,14 @@ module Interfacer
           end
         end
 
-        specify do
+        before do
           Interface.build(:abstract_vehicle) do
             def_public_methods(:start, :stop)
             def_protected_methods(:reset)
           end
+        end
+
+        specify do
           expect(build).to eq ScooterToCarAdapter
         end
       end
